@@ -1,0 +1,1 @@
+##Script to scrape apartment cost from Irvine Company apartment
