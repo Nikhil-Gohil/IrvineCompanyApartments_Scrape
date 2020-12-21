@@ -14,34 +14,55 @@ printer = pprint.PrettyPrinter(indent=4)
 
 
 def main():
-    wb = openpyxl.Workbook()
-    wb.remove_sheet(wb.get_sheet_by_name("Sheet"))
-    
+    wb = open_excel_workbook()
+
     outfile = build_outfile_name()
-    
-    url_dict = {}
-    populate_url_dict(url_dict)
+
+    url_dict = create_populate_url_dict()
 
     for name, url in url_dict.items():
         print("Processing {}".format(name))
         parse_ica_page(name, url, wb)
 
-    
     wb.save(outfile)
+
+
+def open_excel_workbook():
+    wb = openpyxl.Workbook()
+    del wb["Sheet"]
+    # wb.remove_s(wb.get_sheet_by_name("Sheet"))
+    return wb
+
 
 def build_outfile_name():
     now = datetime.datetime.now()
     str1 = now.strftime("%a_%b%d_%H_%M")
     fn = "Apartment_Availability_" + str1 + ".xlsx"
-    return(fn)
+    return fn
 
-def populate_url_dict(url_dict):
-    url_dict["The Village"] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/village-at-irvine-spectrum/availability.html"
-    url_dict["Oak Glen"] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/oak-creek/oak-glen/availability.html"
-    url_dict["Cypress Village"] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/cypress-village/communities/availability.html"
-    url_dict["Avella"] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/cypress-village/avella/availability.html"
-    url_dict["Quail Hill"] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/quail-hill/communities/availability.html"
-    url_dict["The Park"] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/the-park/availability.html"
+
+def create_populate_url_dict():
+    url_dict = {}
+    url_dict[
+        "The Village"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/village-at-irvine-spectrum/availability.html"
+    url_dict[
+        "Oak Glen"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/oak-creek/oak-glen/availability.html"
+    url_dict[
+        "Cypress Village"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/cypress-village/communities/availability.html"
+    url_dict[
+        "Avella"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/cypress-village/avella/availability.html"
+    url_dict[
+        "Quail Hill"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/quail-hill/communities/availability.html"
+    url_dict[
+        "The Park"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/the-park/availability.html"
+    return url_dict
+
 
 def create_populate_sheet_headers(name, wb):
     wb.create_sheet(title=name)
@@ -67,29 +88,29 @@ def convert_to_int(str1):
     except ValueError:
         return str1
 
+
 def convert_to_float(str1):
     try:
         num = float(str1)
         return num
     except ValueError:
         return str1
-        
 
 
 def parse_ica_page(name, url, wb):
-    browser = webdriver.Chrome()
     # url = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/village-at-irvine-spectrum/availability.html"
+    browser = webdriver.Chrome()
+
     browser.get(url)
 
     # source = requests.get(
     #    "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/village-at-irvine-spectrum/availability.html#"
     # ).text
 
-
     html_source = browser.page_source
     browser.quit()
 
-    #input = open("source_soup.html", "r")
+    # input = open("source_soup.html", "r")
     soup = BeautifulSoup(html_source, "lxml")
     all_apartments_list = soup.find_all("ul", class_="results-list loaded")
     # printer.pprint(soup)
@@ -103,12 +124,10 @@ def parse_ica_page(name, url, wb):
     text = junk_value.get_text()
     # text.replace(" ", "")
     # print("Text is *{}*".format(text))
-    #if re.match("\n\nNeed More Options.*", text):
+    # if re.match("\n\nNeed More Options.*", text):
     #    pass
-    #else:
+    # else:
     #    exit("The last value is not need more options, please recheck!")
-
-
 
     row = 1
     column = 1
@@ -176,18 +195,20 @@ def parse_ica_page(name, url, wb):
         sheet.cell(row=row, column=9).value = cost
         sheet.cell(row=row, column=10).value = term_length
         sheet.cell(row=row, column=11).value = availability
-    
+
     sheet.auto_filter.ref = sheet.dimensions
 
     dims = {}
     for row in sheet.rows:
         for cell in row:
             if cell.value:
-                dims[cell.column_letter] = max((dims.get(cell.column_letter, 0), len(str(cell.value))))
+                dims[cell.column_letter] = max(
+                    (dims.get(cell.column_letter, 0), len(str(cell.value)))
+                )
     for col, value in dims.items():
         sheet.column_dimensions[col].width = value + 3
 
-        #print(
+        # print(
         #    "Apartment *{}* Amenity *{}* Bed *{}* Bath *{}* Size *{}* Price *{}* Term *{}* Avail *{}*".format(
         #        name,
         #        amenity,
@@ -198,8 +219,9 @@ def parse_ica_page(name, url, wb):
         #        term_length,
         #        availability,
         #    )
-        #)
+        # )
         # print("##############################")
+
 
 if __name__ == "__main__":
     main()
