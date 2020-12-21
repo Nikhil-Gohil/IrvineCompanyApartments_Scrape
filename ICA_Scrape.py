@@ -8,7 +8,7 @@ import pprint
 import re
 import openpyxl
 import datetime
-
+import time
 
 printer = pprint.PrettyPrinter(indent=4)
 
@@ -68,6 +68,22 @@ def create_populate_url_dict():
     url_dict[
         "The Park"
     ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/the-park/availability.html"
+    url_dict[
+        "Woodbury Court"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/woodbury/woodbury/woodbury-court/availability.html"
+    url_dict[
+        "Centerpointe"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/centerpointe/availability.html"
+    url_dict[
+        "Westview"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/westview/availability.html"
+    url_dict[
+        "Los Olivos"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/los-olivos/availability.html"
+    url_dict[
+        "Promenade"
+    ] = "https://www.irvinecompanyapartments.com/locations/orange-county/irvine/spectrum/promenade-at-spectrum/availability.html"
+
     return url_dict
 
 
@@ -123,6 +139,7 @@ def get_page_source(url):
     """
     browser = webdriver.Chrome()
     browser.get(url)
+    time.sleep(10)
     html_source = browser.page_source
     browser.quit()
     return html_source
