@@ -45,7 +45,7 @@ def populate_url_dict(url_dict):
 
 def create_populate_sheet_headers(name, wb):
     wb.create_sheet(title=name)
-    sheet = wb.get_sheet_by_name(name)
+    sheet = wb[name]
     sheet.cell(row=1, column=1).value = "Identifier"
     sheet.cell(row=1, column=2).value = "Building No."
     sheet.cell(row=1, column=3).value = "Building Name"
@@ -113,7 +113,7 @@ def parse_ica_page(name, url, wb):
     row = 1
     column = 1
     create_populate_sheet_headers(name, wb)
-    sheet = wb.get_sheet_by_name(name)
+    sheet = wb[name]
 
     for apartment in individual_apartments:
         text = apartment.get_text()
@@ -176,6 +176,16 @@ def parse_ica_page(name, url, wb):
         sheet.cell(row=row, column=9).value = cost
         sheet.cell(row=row, column=10).value = term_length
         sheet.cell(row=row, column=11).value = availability
+    
+    sheet.auto_filter.ref = sheet.dimensions
+
+    dims = {}
+    for row in sheet.rows:
+        for cell in row:
+            if cell.value:
+                dims[cell.column_letter] = max((dims.get(cell.column_letter, 0), len(str(cell.value))))
+    for col, value in dims.items():
+        sheet.column_dimensions[col].width = value + 3
 
         #print(
         #    "Apartment *{}* Amenity *{}* Bed *{}* Bath *{}* Size *{}* Price *{}* Term *{}* Avail *{}*".format(
